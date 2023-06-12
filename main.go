@@ -26,9 +26,8 @@ func main() {
 		})
 	})
 	routes.Routes(r)
-
 	port := os.Getenv("PORT")
-	err := r.Run(":" + port)
+	err := r.Run(port)
 	if err != nil {
 		log.Fatal("Error running server")
 	}
