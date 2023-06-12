@@ -1,15 +1,17 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"server-v2/config"
 	"server-v2/models"
+	"strconv"
 )
 
 func GetAllTransactions(c *gin.Context) {
 	var transactions []models.Transaction
 
-	config.DB.Find(&transactions)
+	config.DB.Preload("User").Preload("Vehicle").Preload("Oil").Find(&transactions)
 
 	c.JSON(200, gin.H{
 		"data": transactions,
@@ -27,15 +29,41 @@ func GetByIdTransaction(c *gin.Context) {
 }
 
 func CreateTransactions(c *gin.Context) {
-	var transaction models.Transaction
-	err := c.BindJSON(&transaction)
-	if err != nil {
+	var inputTransaction models.TransactionInput
+
+	fmt.Printf("ini merupakan sampe")
+	if err := c.ShouldBindJSON(&inputTransaction); err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	config.DB.Create(&transaction)
+	userId, _ := c.Get("id")
+	intUserId, err := strconv.Atoi(userId.(string))
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	transaction := models.Transaction{
+		UserId:    intUserId,
+		VehicleId: inputTransaction.VehicleId,
+		OilId:     inputTransaction.OilId,
+		QrCodeUrl: inputTransaction.QrCodeUrl,
+	}
+
+	if err := config.DB.Create(&transaction).Error; err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	c.JSON(200, gin.H{
-		"data": transaction,
+		"message": "success create transaction",
 	})
+
 }

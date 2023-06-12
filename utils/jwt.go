@@ -57,6 +57,7 @@ func AuthMiddleware(c *gin.Context) {
 	}
 
 	id := token.Claims.(jwt.MapClaims)["id"]
+	fmt.Printf("id: %v ini id yaa dari auth", id)
 	c.Set("id", id)
 	c.Next()
 }

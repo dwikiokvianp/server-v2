@@ -20,10 +20,16 @@ func main() {
 	config.InitDatabase(databaseUrl)
 
 	r := gin.Default()
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "Welcome to my API",
+		})
+	})
 	routes.Routes(r)
 
-	err := r.Run(":8080")
+	port := os.Getenv("PORT")
+	err := r.Run(":" + port)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error running server")
 	}
 }
